@@ -91,5 +91,43 @@ namespace Roommates.Repositories
         }
 
 
+
+        /// <summary>
+        ///  Returns a single room with the given id.
+        /// </summary>
+        public Room GetById(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT Name, MaxOccupancy FROM Room WHERE Id = @id";
+                    cmd.Parameters.AddWithValue("@id", id);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    Room room = null; // making a room local variable with initial value of null
+
+                    // If we only expect a single row back from the database, we don't need a while loop.
+                    if (reader.Read())
+                    {
+                        room = new Room
+                        {
+                            Id = id,
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            MaxOccupancy = reader.GetInt32(reader.GetOrdinal("MaxOccupancy")),
+                        };
+                    }
+
+                    reader.Close();
+
+                    return room;
+                }
+            }
+        }
+
+
+
     }
+
 }
