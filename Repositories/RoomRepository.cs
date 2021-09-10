@@ -127,6 +127,33 @@ namespace Roommates.Repositories
         }
 
 
+        /// <summary>
+        ///  Add a new room to the database
+        ///   NOTE: This method sends data to the database,
+        ///   it does not get anything from the database, so there is nothing to return.
+        /// </summary>
+        public void Insert(Room room)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"INSERT INTO Room (Name, MaxOccupancy) 
+                                         OUTPUT INSERTED.Id 
+                                         VALUES (@name, @maxOccupancy)";
+                    cmd.Parameters.AddWithValue("@name", room.Name);
+                    cmd.Parameters.AddWithValue("@maxOccupancy", room.MaxOccupancy);
+                    int id = (int)cmd.ExecuteScalar();
+
+                    room.Id = id;
+                }
+            }
+
+            // when this method is finished we can look in the database and see the new room.
+        }
+
+
 
     }
 
