@@ -105,6 +105,47 @@ namespace Roommates.Repositories
             }
         }
 
+        // update a chore 
+        public void UpdateChore(Chore chore)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"UPDATE Chore 
+                                    SET Name = @name
+                                    WHERE Id = @id";
+                    cmd.Parameters.AddWithValue("@name", chore.Name);
+                    cmd.Parameters.AddWithValue("@id", chore.Id);
+
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+
+
+        // delete a chore
+        //public void DeleteChore(int id)
+        //{
+        //    using (SqlConnection conn = Connection)
+        //    {
+        //        conn.Open();
+        //        using (SqlCommand cmd = conn.CreateCommand())
+        //        {
+                  
+        //        }
+        //    }
+        //}
+
+
+
+
+
+
+
         ///  Add a new chore to the database:
         public void InsertChore(Chore chore)
         {
