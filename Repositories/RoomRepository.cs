@@ -7,8 +7,6 @@ using Microsoft.Data.SqlClient;
 using Roommates.Models;
 
 
-
-
 namespace Roommates.Repositories
 {
     /// <summary>
@@ -24,11 +22,10 @@ namespace Roommates.Repositories
 
         // ...We'll add some methods shortly...
 
-
         /// <summary>
         ///  Get a list of all Rooms in the database
         /// </summary>
-        public List<Room> GetAll()
+        public List<Room> GetAllRooms()
         {
             //  We must "use" the database connection.
             //  Because a database is a shared resource (other applications may be using it too) we must
@@ -90,12 +87,10 @@ namespace Roommates.Repositories
             }
         }
 
-
-
         /// <summary>
         ///  Returns a single room with the given id.
         /// </summary>
-        public Room GetById(int id)
+        public Room GetRoomById(int id)
         {
             using (SqlConnection conn = Connection)
             {
@@ -106,7 +101,7 @@ namespace Roommates.Repositories
                     cmd.Parameters.AddWithValue("@id", id);
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    Room room = null; // making a room local variable with initial value of null
+                    Room room = null; // creating a local room variable with initial value of null
 
                     // If we only expect a single row back from the database, we don't need a while loop.
                     if (reader.Read())
@@ -126,13 +121,12 @@ namespace Roommates.Repositories
             }
         }
 
-
         /// <summary>
         ///  Add a new room to the database
         ///   NOTE: This method sends data to the database,
         ///   it does not get anything from the database, so there is nothing to return.
         /// </summary>
-        public void Insert(Room room)
+        public void InsertRoom(Room room)
         {
             using (SqlConnection conn = Connection)
             {
@@ -153,8 +147,6 @@ namespace Roommates.Repositories
             // when this method is finished we can look in the database and see the new room.
         }
 
-
-
     }
-
 }
+
