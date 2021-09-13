@@ -127,19 +127,20 @@ namespace Roommates.Repositories
 
 
 
-        // delete a chore
-        //public void DeleteChore(int id)
-        //{
-        //    using (SqlConnection conn = Connection)
-        //    {
-        //        conn.Open();
-        //        using (SqlCommand cmd = conn.CreateCommand())
-        //        {
-                  
-        //        }
-        //    }
-        //}
-
+        //delete a chore
+        public void DeleteChore(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "DELETE FROM Chore WHERE Id = @id";
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
 
 
 
