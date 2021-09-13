@@ -207,6 +207,15 @@ namespace Roommates
                         Console.ReadKey();
                         break;
 
+                    case ("Show all unassigned chores"):
+                        List<Chore> unassignedChores = choreRepo.GetUnassingedChores();
+                        foreach (Chore c in unassignedChores)
+                        {
+                            Console.WriteLine($"{c.Name} chore has an Id of {c.Id}! :)");
+                        }
+                        Console.Write("Press any key to continue");
+                        Console.ReadKey();
+                        break;
 
 
 
@@ -236,6 +245,7 @@ namespace Roommates
                 "Delete a room",
                 "Update a chore",
                 "Delete a chore",
+                "Show all unassigned chores",
                 "Exit"
             };
 
