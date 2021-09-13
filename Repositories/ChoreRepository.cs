@@ -81,7 +81,39 @@ namespace Roommates.Repositories
 
                         Chore chore = null; // creating a local chore variable with initial value of null
 
-                        // if we only expect a single row back from the database
+                        // if we only expect a single row back from the database, we don't need a while loop
+                        if (read.Read())
+                        {
+                            // create a new chore object via object initializer using the data from the database:
+                            chore = new Chore
+                            {
+                                Id = id,
+                                Name = reader.GetString(reader.GetOrdinal("Name"))
+                            };
+                        }
+
+                        reader.Close();
+                        return chore;
                     }
                 }
-}
+            
+
+            // add a new chore to the database:
+            public void InsertChore (Chore chore)
+            {
+                using (SqlConnection choreConn = Connection)
+                {
+                    choreConn.Open();
+                    using (SqlCommad cmd = choreConn.CreateCommand())
+                    {
+                        cmd.CommandText = @"INSERT INTO Chore (Name)
+                                        OUTPUT INSERTED.Id
+                                        VALUES (@Name)";
+                        cmd.Parameters.AddWithValues("@Name", chore.Name);
+                        int choreId = (int)cmd.ExecuteScalar();
+
+                        chore.Id = choreId;
+                    }
+                }
+            }
+        }
