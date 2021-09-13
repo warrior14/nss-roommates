@@ -24,11 +24,11 @@ namespace Roommates.Repositories
                 roommateConn.Open();
                 using (SqlCommand cmd = roommateConn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT FirstName, RentPortion, RoomId
-                                        FROM Roommate 
-                                        INNER JOIN Room
-                                        ON Roommate.RoomId = Room.Id
-                                        WHERE Roommate.Id = @id";
+                    cmd.CommandText = @"SELECT rm.FirstName, rm.RentPortion, rm.RoomId, r.Name
+                                        FROM Roommate rm
+                                        INNER JOIN Room r
+                                        ON rm.RoomId = r.Id
+                                        WHERE rm.Id = @id";
                     cmd.Parameters.AddWithValue("@id", id);
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -58,5 +58,3 @@ namespace Roommates.Repositories
 
     }
 }
-
-
