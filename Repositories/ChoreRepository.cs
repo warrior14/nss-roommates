@@ -105,98 +105,6 @@ namespace Roommates.Repositories
             }
         }
 
-        // update a chore 
-        public void UpdateChore(Chore chore)
-        {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"UPDATE Chore 
-                                    SET Name = @name
-                                    WHERE Id = @id";
-                    cmd.Parameters.AddWithValue("@name", chore.Name);
-                    cmd.Parameters.AddWithValue("@id", chore.Id);
-
-
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-
-
-        //delete a chore
-        public void DeleteChore(int id)
-        {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = "DELETE FROM Chore WHERE Id = @id";
-                    cmd.Parameters.AddWithValue("@id", id);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-
-
-        // gets unassigned chores
-        public List<Chore> GetUnassingedChores()
-        {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"SELECT c.Id, c.Name
-                                      Name FROM Chore c
-                                      LEFT JOIN RoommateChore rc
-                                      ON c.Id = rc.ChoreId
-                                      WHERE rc.RoommateId IS NULL";
-
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-
-                    List<Chore> unAssignedChores = new List<Chore>();
-
-                   while(reader.Read())
-                    {
-                        int idColumnPosition = reader.GetOrdinal("Id");
-
-                        int idValue = reader.GetInt32(idColumnPosition);
-
-                        int nameColumnPosition = reader.GetOrdinal("Name");
-                        string nameValue = reader.GetString(nameColumnPosition);
-
-
-
-                        Chore chore = new Chore
-                        {
-                            Id = idValue,
-                            Name = nameValue
-                        };
-
-                        unAssignedChores.Add(chore);
-                  
-                    }
-                    reader.Close();
-                    return unAssignedChores;
-
-
-                }
-            }
-        }
-
-
-
-
-
-
-
         ///  Add a new chore to the database:
         public void InsertChore(Chore chore)
         {
@@ -215,5 +123,136 @@ namespace Roommates.Repositories
                 }
             }
         }
+
+        /// <summary>
+        ///  Updates the chore
+        /// </summary>
+        public void UpdateChore(Chore chore)
+        {
+            using (SqlConnection choreConn = Connection)
+            {
+                choreConn.Open();
+                using (SqlCommand cmd = choreConn.CreateCommand())
+                {
+                    cmd.CommandText = @"UPDATE Chore
+                                    SET Name = @name
+                                    WHERE Id = @id";
+                    cmd.Parameters.AddWithValue("@name", chore.Name);
+                    cmd.Parameters.AddWithValue("@id", chore.Id);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        ///  Delete the chore with the given id
+        /// </summary>
+        public void DeleteChore(int id)
+        {
+            using (SqlConnection choreConn = Connection)
+            {
+                choreConn.Open();
+                using (SqlCommand cmd = choreConn.CreateCommand())
+                {
+                    cmd.CommandText = "DELETE FROM Chore WHERE Id = @id";
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // Retrieves unassigned chores:
+        public List<Chore> GetUnassignedChores()
+        {
+            using (SqlConnection choreConn = Connection)
+            {
+                choreConn.Open();
+                using (SqlCommand cmd = choreConn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT c.Id, c.Name 
+                                      FROM Chore c 
+                                      LEFT JOIN RoommateChore rc
+                                      ON c.Id = rc.ChoreId 
+                                      WHERE rc.RoommateId IS NULL";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<Chore> unassignedChores = new List<Chore>();
+
+                    while (reader.Read())
+                    {
+                        int idColumnPosition = reader.GetOrdinal("Id");
+                        int idValue = reader.GetInt32(idColumnPosition);
+
+                        int nameColumnPosition = reader.GetOrdinal("Name");
+                        string nameValue = reader.GetString(nameColumnPosition);
+
+                        Chore chore = new Chore
+                        {
+                            Id = idValue,
+                            Name = nameValue
+                        };
+
+                        unassignedChores.Add(chore);
+                    }
+
+                    reader.Close();
+
+                    return unassignedChores;
+                }
+            }
+        }
+
+        // Assigns a chore to a roommate:
+        public void AssignChore(int roommateId, int choreId)
+        {
+            using (SqlConnection choreConn = Connection)
+            {
+                choreConn.Open();
+                using (SqlCommand cmd = choreConn.CreateCommand())
+                {
+                    cmd.CommandText = @"INSERT INTO RoommateChore (RoommateId, ChoreId)
+                                      OUTPUT INSERTED.Id
+                                      VALUES (@roommateId, @choreId)";
+                    cmd.Parameters.AddWithValue("@roommateId", roommateId);
+                    cmd.Parameters.AddWithValue("@choreId", choreId);
+                    // cmd.ExecuteScalar();
+                    cmd.ExecuteNonQuery(); // don't need ExecuteScalar() method as don't need to retrieve value from db
+                }
+            }
+        }
+
+        // Counts number of chores assigned to each roommate:
+        public List<ChoreCount> GetChoreCounts()
+        {
+            using (SqlConnection choreConn = Connection)
+            {
+                choreConn.Open();
+                using (SqlCommand cmd = choreConn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT rm.FirstName, rm.LastName, COUNT(*) as ChoreCount
+                                      FROM Roommate rm
+                                      INNER JOIN RoommateChore rc
+                                      ON rm.Id = rc.RoommateId
+                                      GROUP BY rm.Id, rm.FirstName, rm.LastName";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<ChoreCount> choreCounts = new List<ChoreCount>();
+
+                    while (reader.Read())
+                    {
+                        choreCounts.Add(new ChoreCount
+                        {
+                            RoommateName = reader.GetString(reader.GetOrdinal("FirstName")) + " " + reader.GetString(reader.GetOrdinal("LastName")),
+                            Count = reader.GetInt32(reader.GetOrdinal("ChoreCount"))
+                        });
+                    }
+
+                    reader.Close();
+                    return choreCounts;
+                }
+            }
+        }
+
     }
 }
